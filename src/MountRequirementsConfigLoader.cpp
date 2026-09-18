@@ -154,6 +154,8 @@ void MountRequirements::InitializeConfiguration()
 
 void MountRequirements::LoadMiscMountsData()
 {
+    MiscMountsData.clear();
+
     std::istringstream mountBackupDataStream(MountBackupData);
     std::string mountData;
 

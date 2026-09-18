@@ -38,6 +38,8 @@ class MountRequirements
         std::unordered_map<uint32, MountInfo> GetOverridenMountsInfo();
         std::string BuildSpellUpdateQuery(const std::vector<uint32> ids, const uint32 buy, const uint32 level);
         std::string BuildSpellUpdateQuery(const uint32 id, const uint32 buy, const uint32 level);
+        std::string BuildTrainerSpellUpdateQuery(const std::vector<uint32> ids, const uint32 buy, const uint32 level);
+        std::string BuildTrainerSpellUpdateQuery(const uint32 id, const uint32 buy, const uint32 level);
         std::string VectorToCSV(const std::vector<uint32>& v);
 
     private:

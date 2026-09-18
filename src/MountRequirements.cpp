@@ -33,6 +33,11 @@ void MountRequirements::ApplyCustomMountRequirements()
     trans->Append(BuildSpellUpdateQuery(ExpertRidingTrainerSpellID,      ExpertRidingSkillBuyPrice,      ExpertRidingSkillRequiredLevel));
     trans->Append(BuildSpellUpdateQuery(ArtisanRidingTrainerSpellID,     ArtisanRidingSkillBuyPrice,     ArtisanRidingSkillRequiredLevel));
     trans->Append(BuildSpellUpdateQuery(ColdWeatherFlyingTrainerSpellID, ColdWeatherFlyingSkillBuyPrice, ColdWeatherFlyingSkillRequiredLevel));
+    trans->Append(BuildTrainerSpellUpdateQuery(ApprenticeRidingTrainerSpellID,  ApprenticeRidingSkillBuyPrice,  ApprenticeRidingSkillRequiredLevel));
+    trans->Append(BuildTrainerSpellUpdateQuery(JourneymanRidingTrainerSpellID,  JourneymanRidingSkillBuyPrice,  JourneymanRidingSkillRequiredLevel));
+    trans->Append(BuildTrainerSpellUpdateQuery(ExpertRidingTrainerSpellID,      ExpertRidingSkillBuyPrice,      ExpertRidingSkillRequiredLevel));
+    trans->Append(BuildTrainerSpellUpdateQuery(ArtisanRidingTrainerSpellID,     ArtisanRidingSkillBuyPrice,     ArtisanRidingSkillRequiredLevel));
+    trans->Append(BuildTrainerSpellUpdateQuery(ColdWeatherFlyingTrainerSpellID, ColdWeatherFlyingSkillBuyPrice, ColdWeatherFlyingSkillRequiredLevel));
     trans->Append(BuildItemUpdateQuery(TomeOfColdWeatherFlightItemID, TomeOfColdWeatherFlightBuyPrice, TomeOfColdWeatherFlightSellPrice, TomeOfColdWeatherFlightRequiredLevel));
 
     // Set Requirements for Mounts
@@ -131,6 +136,9 @@ std::unordered_map<uint32, MountInfo> MountRequirements::GetOverridenMountsInfo(
         }
     }
 
+    if (overrides.empty())
+        return overrides;
+
     // Remove entries that are not mounts
     QueryResult result = WorldDatabase.Query("SELECT `entry`, `class`, `subclass`, `name` FROM `item_template` WHERE entry IN ({})", overriddenMountItemIDs.str());
     if (!result || result->GetRowCount() == 0)
@@ -170,6 +178,11 @@ void MountRequirements::RestoreOriginalMountRequirements()
     trans->Append(BuildSpellUpdateQuery(ExpertRidingTrainerSpellID,      OriginalExpertRidingSkillBuyPrice,      OriginalExpertRidingSkillRequiredLevel));
     trans->Append(BuildSpellUpdateQuery(ArtisanRidingTrainerSpellID,     OriginalArtisanRidingSkillBuyPrice,     OriginalArtisanRidingSkillRequiredLevel));
     trans->Append(BuildSpellUpdateQuery(ColdWeatherFlyingTrainerSpellID, OriginalColdWeatherFlyingSkillBuyPrice, OriginalColdWeatherFlyingSkillRequiredLevel));
+    trans->Append(BuildTrainerSpellUpdateQuery(ApprenticeRidingTrainerSpellID,  OriginalApprenticeRidingSkillBuyPrice,  OriginalApprenticeRidingSkillRequiredLevel));
+    trans->Append(BuildTrainerSpellUpdateQuery(JourneymanRidingTrainerSpellID,  OriginalJourneymanRidingSkillBuyPrice,  OriginalJourneymanRidingSkillRequiredLevel));
+    trans->Append(BuildTrainerSpellUpdateQuery(ExpertRidingTrainerSpellID,      OriginalExpertRidingSkillBuyPrice,      OriginalExpertRidingSkillRequiredLevel));
+    trans->Append(BuildTrainerSpellUpdateQuery(ArtisanRidingTrainerSpellID,     OriginalArtisanRidingSkillBuyPrice,     OriginalArtisanRidingSkillRequiredLevel));
+    trans->Append(BuildTrainerSpellUpdateQuery(ColdWeatherFlyingTrainerSpellID, OriginalColdWeatherFlyingSkillBuyPrice, OriginalColdWeatherFlyingSkillRequiredLevel));
     trans->Append(BuildItemUpdateQuery(TomeOfColdWeatherFlightItemID, OriginalTomeOfColdWeatherFlightBuyPrice, OriginalTomeOfColdWeatherFlightSellPrice, OriginalTomeOfColdWeatherFlightRequiredLevel));
 
     // Restore Original Requirements for Mounts
@@ -219,12 +232,16 @@ void MountRequirements::AppendMiscMountUpdate(
         {
             case APPRENTICE_RIDING_SKILL_RANK:
                 t->Append(BuildItemUpdateQuery(m.ItemID, apprMountBuyPrice, apprMountSellPrice, apprMountReqLevel));
+                break;
             case JOURNEYMAN_RIDING_SKILL_RANK:
                 t->Append(BuildItemUpdateQuery(m.ItemID, jourMountBuyPrice, jourMountSellPrice, jourMountReqLevel));
+                break;
             case EXPERT_RIDING_SKILL_RANK:
                 t->Append(BuildItemUpdateQuery(m.ItemID, exprMountBuyPrice, exprMountSellPrice, exprMountReqLevel));
+                break;
             case ARTISAN_RIDING_SKILL_RANK:
                 t->Append(BuildItemUpdateQuery(m.ItemID, artiMountBuyPrice, artiMountSellPrice, artiMountReqLevel));
+                break;
             default:
                 break;
         }
@@ -279,6 +296,21 @@ std::string MountRequirements::BuildSpellUpdateQuery(const std::vector<uint32> i
         "`MoneyCost` = "  + std::to_string(buy) + ", "
         "`ReqLevel` = " + std::to_string(level) + " "
         "WHERE `SpellID` IN (" + entriesCSV + ")";
+    return sql;
+}
+
+std::string MountRequirements::BuildTrainerSpellUpdateQuery(const uint32 id, const uint32 buy, const uint32 level)
+{
+    return MountRequirements::BuildTrainerSpellUpdateQuery(std::vector<uint32>{id}, buy, level);
+}
+
+std::string MountRequirements::BuildTrainerSpellUpdateQuery(const std::vector<uint32> ids, const uint32 buy, const uint32 level)
+{
+    std::string entriesCSV = VectorToCSV(ids);
+    std::string sql = "UPDATE trainer_spell SET "
+        "`MoneyCost` = " + std::to_string(buy) + ", "
+        "`ReqLevel` = " + std::to_string(level) + " "
+        "WHERE `SpellId` IN (" + entriesCSV + ")";
     return sql;
 }
 
